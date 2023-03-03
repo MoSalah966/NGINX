@@ -8,7 +8,7 @@ if config   #to get ip for review on http
 
 ls -l /etc/nginx
 #in yum package >> service nginx start because it doesn't start the nginx automatically
-
+#now let's build nginx from source and adding modules
 apt update
 wget http://nginx.org/download/nginx-1.13.10.tar.gz 
 ls -l
@@ -18,5 +18,95 @@ cd nginx-1.13.10/
 ./configure    #will give an error  that c compiler not found
 apt-get install build-essential
 ./configure
-apt-get install libcre3 libcre3-dev zlib1g zlib1g-dev
+apt-get install libcre3 libcre3-dev zlib1g zlib1g-dev libssl-dev
+./configure
+./configure --help
+./configure --sbin-path=/usr/bin/nginx --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=-/var/log/nginx/access.log--with-pcre
+ --pid-path=/var/run/nginx.pid --with-http_ssl_module    #user of nginx executable to can start and stop nginx from.  # add all of these configuration on installation
 
+#compile these configuration source with make command
+make
+make install    #install the compiled source
+ls -l /etc/nginx
+nginx -v 
+nginx          #to start nginx
+ps aux | grep nginx
+
+
+# adding an nginx system service
+nginx -h  #for help
+# to send a signal > -s 
+nginx -s stop
+touch  /lib/systemd/system/nginx.service
+vim  /lib/systemd/system/nginx.service
+[Unit]
+Description=The NGINX HTTP and reverse proxy server
+After=syslog.target network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
+
+[Service]
+Type=forking
+PIDFile=var/run/nginx.pid
+ExecStartPre=/usr/bin/nginx -t     #the restart command
+ExecStart=/usr/bin/nginx            #actual start command
+ExecReload=/usr/bin/nginx -s reload
+ExecStop=/bin/kill -s QUIT $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+
+systemctl start nginx
+systemctl enable nginx
+
+#directive is specific configuration option that get set in the configuration files and cosist of a name and a value context
+# example: server_name mydomain.com;
+#context is a section within a configuration where directives can be set for that given 
+#context also can be nested and inherit from their parents with the topmost context simply being the configuration file itself and called the main context and is where we configure global directives that apply to the master process
+
+#creating a virtual host
+ls -l /sites/demo
+#put index.html style.css and thumb.png inside this directory
+vim /etc/nginx/nginx.conf
+
+events {}
+
+http {
+
+    server {
+
+        listen 80;
+        server_name #serverIPorhostname;
+        root /sites/demo;
+
+    }    
+}
+
+nginx -t  #test nginx conf
+systemctl reload nginx
+curl -I http://serverIP/style.css    # >> will give me the content/Type
+cat /etc/nginx/mime.types   #>> copy the needed content for types section
+vim /etc/nginx/nginx.conf
+
+
+events {}
+
+http {
+
+    # types {}
+    include mime.types;
+
+    server {
+
+        listen 80;
+        server_name #serverIPorhostname;
+        root /sites/demo;
+
+    }    
+}
+
+systemctl reload nginx
+curl -I http://serverIP/style.css
+
+
+# location blocks
