@@ -1,0 +1,22 @@
+#installing nginx with package manager
+
+apt-get update
+apt-get install nginx -y
+ps aux | grep nginx    #have a master and a worker processes
+if config   #to get ip for review on http
+#if it's amazon instance so go with the public ip
+
+ls -l /etc/nginx
+#in yum package >> service nginx start because it doesn't start the nginx automatically
+
+apt update
+wget http://nginx.org/download/nginx-1.13.10.tar.gz 
+ls -l
+tar -zxvf nginx-1.13.10.tar.gz
+ls -l
+cd nginx-1.13.10/
+./configure    #will give an error  that c compiler not found
+apt-get install build-essential
+./configure
+apt-get install libcre3 libcre3-dev zlib1g zlib1g-dev
+
